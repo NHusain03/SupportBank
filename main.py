@@ -32,7 +32,12 @@ class Parser:
             with open(self.filename, 'r') as fcc_file:
                 trans_data = json.load(fcc_file)
                 for trans in trans_data:
-                    self.localTransactions.append(list(trans.values()))
+                    trans_list = list(trans.values())
+                    trans_list[0] = trans_list[0][:10].split("-")
+                    trans_list[0].reverse()
+                    trans_list[0] = "/".join(trans_list[0])
+
+                    self.localTransactions.append(trans_list)
 
         elif self.filename[-1] == "l":
             file = xml.dom.minidom.parse(self.filename)
