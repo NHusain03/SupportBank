@@ -1,26 +1,41 @@
+import logging
+import csv
+
+
 accounts = {}
 transactions = []
+dodgyTransactions = []
 
-
-import csv
+logging.basicConfig(filename='SupportBank.log', filemode='w', level=logging.DEBUG)
 
 with open('Transactions2014.csv') as csvfile:
     csvReader = csv.reader(csvfile, delimiter=',')
     for row in csvReader:
         transactions.append(row)
 
+with open('DodgyTransactions2015.csv') as csvfile:
+    csvReader = csv.reader(csvfile, delimiter=',')
+    for row in csvReader:
+        dodgyTransactions.append(row)
+
 transactions = transactions[1:]
+dodgyTransactions = dodgyTransactions[1:]
+transactions = transactions + dodgyTransactions
 
 for t in transactions:
-    if t[1] in accounts:
-        accounts[t[1]] -= float(t[4])
-    else:
-        accounts[t[1]] = (float(t[4]) * -1)
+    try:
+        if t[1] in accounts:
+            accounts[t[1]] -= float(t[4])
+        else:
+            accounts[t[1]] = (float(t[4]) * -1)
 
-    if t[2] in accounts:
-        accounts[t[2]] += float(t[4])
-    else:
-        accounts[t[2]] = float(t[4])
+        if t[2] in accounts:
+            accounts[t[2]] += float(t[4])
+        else:
+            accounts[t[2]] = float(t[4])
+    except:
+        logging.warning(str(t))
+
 
 
 
