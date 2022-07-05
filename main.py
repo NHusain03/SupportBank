@@ -108,6 +108,12 @@ if __name__ == '__main__':
                 if " ".join(commandSep[1:]) == t[1] or " ".join(commandSep[1:]) == t[2]:
                     print(t)
 
+        elif commandSep[0] == "Export":
+            with open(commandSep[2], 'w') as out_file:
+                for t in transactions:
+                    outputT = ",".join(map(lambda x: str(x), t))
+                    out_file.write(outputT + "\n")
+
         elif command == "Done":
             finished = True
 
