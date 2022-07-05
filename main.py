@@ -1,29 +1,14 @@
 import logging
 import csv
 import json
-
-with open('Transactions2013.json', 'r') as fcc_file:
-    fcc_data = json.load(fcc_file)
-    print(list(fcc_data[0].values()))
+import xml.dom.minidom
+from datetime import datetime
+from datetime import timedelta
 
 accounts = {}
 transactions = []
 
 logging.basicConfig(filename='SupportBank.log', filemode='w', level=logging.DEBUG)
-
-# for t in transactions:
-#     try:
-#         if t[1] in accounts:
-#             accounts[t[1]] -= float(t[4])
-#         else:
-#             accounts[t[1]] = (float(t[4]) * -1)
-#
-#         if t[2] in accounts:
-#             accounts[t[2]] += float(t[4])
-#         else:
-#             accounts[t[2]] = float(t[4])
-#     except:
-#         logging.warning(str(t))
 
 class Parser:
     def __init__(self, filename):
@@ -41,11 +26,27 @@ class Parser:
                 for row in csvReader:
                     self.localTransactions.append(row)
 
+            self.localTransactions = self.localTransactions[1:]
+
         elif self.filename[-1] == "n":
             with open(self.filename, 'r') as fcc_file:
                 trans_data = json.load(fcc_file)
                 for trans in trans_data:
                     self.localTransactions.append(list(trans.values()))
+
+        elif self.filename[-1] == "l":
+            file = xml.dom.minidom.parse(self.filename)
+            models = file.getElementsByTagName('SupportTransaction')
+
+            for model in models:
+                trans = [
+                    self.dateConverterXML(model.attributes['Date'].value),
+                    model.getElementsByTagName('Parties')[0].getElementsByTagName('From')[0].firstChild.data,
+                    model.getElementsByTagName('Parties')[0].getElementsByTagName('To')[0].firstChild.data,
+                    model.getElementsByTagName('Description')[0].firstChild.data,
+                    model.getElementsByTagName('Value')[0].firstChild.data
+                ]
+                self.localTransactions.append(trans)
 
 
         for t in self.localTransactions:
@@ -62,11 +63,15 @@ class Parser:
             except:
                 logging.warning(str(t))
 
-        self.localTransactions = self.localTransactions[1:]
 
     def getTransactionsAccounts(self):
         self.readFile()
         return (self.localTransactions, self.localAccounts)
+
+    def dateConverterXML(self, XMLdays):
+        new_date = datetime(1900, 1, 1, 0, 0, 0) + timedelta(days = int(XMLdays))
+        string_date = new_date.strftime("%d/%m/%Y")
+        return string_date
 
 
 # Press the green button in the gutter to run the script.
