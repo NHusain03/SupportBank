@@ -1,13 +1,12 @@
 import Parser
 import logging
 
-accounts = {}
-transactions = []
-
 logging.basicConfig(filename='SupportBank.log', filemode='w', level=logging.DEBUG)
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    accounts = {}
+    transactions = []
     finished = False
 
     while not finished:
@@ -32,14 +31,14 @@ if __name__ == '__main__':
 
         elif commandSep[0] == "List" and " ".join(commandSep[1:]) in accounts:
             for t in transactions:
-                if " ".join(commandSep[1:]) == t[1] or " ".join(commandSep[1:]) == t[2]:
+                if " ".join(commandSep[1:]) == t.personA or " ".join(commandSep[1:]) == t.personB:
                     print(t)
 
         elif commandSep[0] == "Export":
             with open(commandSep[2], 'w') as out_file:
                 for t in transactions:
-                    outputT = ",".join(map(lambda x: str(x), t))
-                    out_file.write(outputT + "\n")
+                    # outputT = ",".join(map(lambda x: str(x), t))
+                    out_file.write(str(t))
 
         elif command == "Done":
             finished = True
