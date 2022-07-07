@@ -1,44 +1,48 @@
-accounts = {}
-transactions = []
+import Parser
+import logging
 
-
-import csv
-
-with open('Transactions2014.csv') as csvfile:
-    csvReader = csv.reader(csvfile, delimiter=',')
-    for row in csvReader:
-        transactions.append(row)
-
-transactions = transactions[1:]
-
-for t in transactions:
-    if t[1] in accounts:
-        accounts[t[1]] -= float(t[4])
-    else:
-        accounts[t[1]] = (float(t[4]) * -1)
-
-    if t[2] in accounts:
-        accounts[t[2]] += float(t[4])
-    else:
-        accounts[t[2]] = float(t[4])
-
-
+logging.basicConfig(filename='SupportBank.log', filemode='w', level=logging.DEBUG)
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    accounts = {}
+    transactions = []
     finished = False
 
     while not finished:
         command = input("Enter command: ")
-        if command == "All":
+        commandSep = command.split(" ")
+
+        if commandSep[0] == 'Import':
+            p = Parser.Parser(commandSep[2])
+            (t, a) = p.getTransactionsAccounts()
+
+            transactions = transactions + t
+
+            for person in a:
+                if person in accounts:
+                    accounts[person] += a[person]
+                else:
+                    accounts[person] = a[person]
+
+        elif command == "List All":
             for account in accounts:
                 print(account + " " + "£"+ str(round(accounts[account], 2)))
-        elif command in accounts:
+
+        elif commandSep[0] == "List" and " ".join(commandSep[1:]) in accounts:
             for t in transactions:
-                if command == t[1] or command == t[2]:
+                if " ".join(commandSep[1:]) == t.personA or " ".join(commandSep[1:]) == t.personB:
                     print(t)
+
+        elif commandSep[0] == "Export":
+            with open(commandSep[2], 'w') as out_file:
+                for t in transactions:
+                    # outputT = ",".join(map(lambda x: str(x), t))
+                    out_file.write(str(t))
+
         elif command == "Done":
             finished = True
+
         else:
             print("Try again.")
 
